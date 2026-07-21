@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.5.8-SNAPSHOT' apply false
     id 'io.spring.dependency-management' version '1.1.7' apply false
+    id "org.sonarqube" version "6.0.1.5171"
 }
 
 allprojects {
@@ -87,6 +88,25 @@ subprojects {
     dependencies {
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
         testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    }
+
+    sonarqube {
+        properties {
+            property "sonar.sources", "src/main/java"
+            property "sonar.tests", "src/test/java"
+            property "sonar.java.binaries", "build/classes/java/main"
+            property "sonar.coverage.jacoco.xmlReportPaths", "${buildDir}/reports/jacoco/test/jacocoTestReport.xml"
+        }
+    }
+}
+
+sonar {
+    properties {
+        property "sonar.projectKey", "filmpire-microservices"
+        property "sonar.projectName", "Filmpire Microservices"
+        property "sonar.host.url", "http://localhost:9090"
+        property "sonar.token", "sqp_544e3f8888b50f38883654497539fa9889f4171a" // Default token or placeholder
+        property "sonar.qualitygate.wait", true
     }
 }
 

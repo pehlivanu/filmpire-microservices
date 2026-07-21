@@ -252,6 +252,41 @@ services:
       start_period: 90s
     restart: unless-stopped
 
+  # SonarQube Database (PostgreSQL)
+  sonarqube-db:
+    image: docker.io/library/postgres:17-alpine
+    container_name: filmpire-sonar-db
+    environment:
+      POSTGRES_DB: sonarqube
+      POSTGRES_USER: sonar
+      POSTGRES_PASSWORD: sonar-password
+    volumes:
+      - sonarqube_db_data:/var/lib/postgresql/data
+    networks:
+      - filmpire-network
+    restart: unless-stopped
+
+  # SonarQube Server
+  sonarqube:
+    image: docker.io/library/sonarqube:lts-community
+    container_name: filmpire-sonarqube
+    depends_on:
+      sonarqube-db:
+        condition: service_started
+    ports:
+      - "9090:9000"
+    environment:
+      SONAR_JDBC_URL: jdbc:postgresql://sonarqube-db:5432/sonarqube
+      SONAR_JDBC_USERNAME: sonar
+      SONAR_JDBC_PASSWORD: sonar-password
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube_logs:/opt/sonarqube/logs
+    networks:
+      - filmpire-network
+    restart: unless-stopped
+
 volumes:
   postgres_data:
     driver: local
@@ -262,6 +297,14 @@ volumes:
   redis_data:
     driver: local
   minio_data:
+    driver: local
+  sonarqube_db_data:
+    driver: local
+  sonarqube_data:
+    driver: local
+  sonarqube_extensions:
+    driver: local
+  sonarqube_logs:
     driver: local
 
 networks:
